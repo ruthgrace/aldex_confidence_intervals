@@ -1,3 +1,5 @@
+library("ALDEx2")
+
 metadata <- read.table("data/clean_metadata_gg.txt",header=TRUE,sep="\t",quote="")
 
 # healthy is represented by 0, SS/NASH is represented by 1
@@ -53,6 +55,8 @@ ssnash.ss <- intersect(healthy.ssnash.20, healthy.ss.20)
 ss.nash <- intersect(healthy.nash.20, healthy.ss.20)
 ss.nash.ssnash <- intersect(ssnash.nash, healthy.ss.20)
 
+nash.metagenomic <- intersect(healthy.nash.20,rownames(metagenomic.nash.healthy.20))
+
 x_axis <- c(1:(length(ss.nash.ssnash)*3))
 
 effect <- c(1:(length(ss.nash.ssnash)*3))
@@ -77,10 +81,13 @@ taxa_labels <- c(1:(length(ss.nash.ssnash)))
 taxa_labels <- as.character(taxa_table$taxonomy[which(rownames(taxa_table)%in%ss.nash.ssnash)])
 taxa_labels <- gsub("^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;","",taxa_labels)
 
+pdf("common_otus_in_hc_vs_nash_ss_effect_size_with_confidence_interval.pdf")
 plot(NA, xlim=c(0,length(ss.nash.ssnash)*3+1),ylim=c(-10,10),main="Confidence Intervals for OTUs with High Effect Size",xlab="OTU",ylab="Effect size",xaxt='n')
 points(x_axis, effect, col=c(1,2,3),ann=FALSE,pch=19)
 arrows(x_axis, effect.025, x_axis, effect.975, length=0.05, angle=90, code=3,col=c(1,2,3))
 text(x =x_axis[c(TRUE,FALSE,FALSE)], y = par("usr")[3] - 0.5, labels = taxa_labels,srt = 45, pos = 1, xpd = TRUE, cex=0.5)
+legend(x=1, y=9, legend=c("Healthy vs. SS/NASH", "Healthy vs. NASH", "Healthy vs. SS"),col=c(1,2,3),pch=19)
+dev.off()
 
 #plot metagenomic effect sizes
 x_axis <- c(1:20)
@@ -91,11 +98,40 @@ effect.025 <- metagenomic.nash.healthy.20$effect.025
 taxa_labels <- c(1:20)
 taxa_labels <- as.character(taxa_table$taxonomy[which(rownames(taxa_table)%in%rownames(metagenomic.nash.healthy.20))])
 taxa_labels <- gsub("^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;","",taxa_labels)
-m
+
+
+pdf("metagenomic_samples_otu_effect_size_with_confidence_intervals.pdf")
 plot(NA, xlim=c(0,21),ylim=c(-15,15),main="Confidence Intervals for OTUs with High Effect Size",xlab="OTU",ylab="Effect size",xaxt='n')
 points(x_axis, effect,ann=FALSE,pch=19)
 arrows(x_axis, effect.025, x_axis, effect.975, length=0.05, angle=90, code=3)
 text(x =x_axis, y = par("usr")[3] - 1.75, labels = taxa_labels,srt = 45, pos = 1, xpd = TRUE, cex=0.5)
+dev.off()
+
+#plot effect sizes for top OTUs in metagenomic and healthy vs. nash
+x_axis <- c(1:(length(nash.metagenomic)*2))
+
+effect <- c(1:(length(nash.metagenomic)*2))
+effect[c(TRUE, FALSE)] <- healthy.nash$effect[which(rownames(healthy.nash)%in%nash.metagenomic)]
+effect[c(FALSE, TRUE)] <- metagenomic.nash.healthy.20$effect[which(rownames(metagenomic.nash.healthy.20)%in%nash.metagenomic)]
+
+effect.975 <- c(1:(length(nash.metagenomic)*2))
+effect.975[c(TRUE, FALSE)] <- healthy.nash$effect.975[which(rownames(healthy.nash)%in%nash.metagenomic)]
+effect.975[c(FALSE, TRUE)] <- metagenomic.nash.healthy.20$effect.975[which(rownames(metagenomic.nash.healthy.20)%in%nash.metagenomic)]
+
+effect.025 <- c(1:(length(nash.metagenomic)*2))
+effect.025[c(TRUE, FALSE)] <- healthy.nash$effect.025[which(rownames(healthy.nash)%in%nash.metagenomic)]
+effect.025[c(FALSE, TRUE)] <- metagenomic.nash.healthy.20$effect.025[which(rownames(metagenomic.nash.healthy.20)%in%nash.metagenomic)]
+
+taxa_labels <- as.character(taxa_table$taxonomy[which(rownames(taxa_table)%in%nash.metagenomic)])
+taxa_labels <- gsub("^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;","",taxa_labels)
+
+pdf("metagenomic_and_healthy_vs_nash_samples_otu_effect_size_with_confidence_intervals.pdf")
+plot(NA, xlim=c(0,((length(nash.metagenomic)*2)+1)),ylim=c(-15,15),main="Confidence Intervals for OTUs with High Effect Size",xlab="OTU",ylab="Effect size",xaxt='n')
+points(x_axis, effect,ann=FALSE,pch=19,col=c(1,2))
+arrows(x_axis, effect.025, x_axis, effect.975, length=0.05, angle=90, code=3,col=c(1,2))
+text(x =x_axis[c(TRUE,FALSE)], y = par("usr")[3] - 1.25, labels = taxa_labels,srt = 45, pos = 1, xpd = TRUE, cex=0.5)
+legend(x=1, y=14, legend=c("Healthy vs. NASH", "Metagenomic study samples only"),col=c(1,2),pch=19)
+dev.off()
 
 
 #
