@@ -133,6 +133,11 @@ text(x =x_axis[c(TRUE,FALSE)], y = par("usr")[3] - 1.25, labels = taxa_labels,sr
 legend(x=1, y=14, legend=c("Healthy vs. NASH", "Metagenomic study samples only"),col=c(1,2),pch=19)
 dev.off()
 
+pdf("metagenomic_and_healthy_vs_nash_effect_size_correlation.pdf")
+metagenomic.effect <- metagenomic.nash.healthy$effect[order(rownames(metagenomic.nash.healthy))]
+nash.effect <- healthy.nash$effect[order(rownames(healthy.nash))]
+plot(metagenomic.effect, nash.effect, pch=19, col=rgb(1,0,1,0.3), main="Metagenomic samples' effect size against all healthy vs. nash effect size", xlab="metagenomic samples effect size", ylab="all samples effect size")
+dev.off()
 
 #
 # ssnash.nash
