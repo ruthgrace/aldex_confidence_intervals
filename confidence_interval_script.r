@@ -20,9 +20,9 @@ ssHealthyGroups[which(is.na(metadata$SSvsNASH))] <- 0
 
 metagenomicGroups <- metadata$SSvsNASH
 metagenomicGroups[] <- NA
-metagenomicNASH <- c("CL-166-BL", "CL-169-BL", "CL-139-BL-2", "CL-173-2", "CL-144-2", "CL-177", "CL-160", "CL-165", "CL-119", "CL-141-BL-R2", "CL-172")
+metagenomicNASH <- c("CL-166-BL", "CL-169-BL", "CL-139-BL-2", "CL-173-2", "CL-177", "CL-160", "CL-165", "CL-119")
 metagenomicGroups[which(metadata$X%in%metagenomicNASH)] <- 1
-metagenomicHealthy <- c("HLD-100", "HLD-102", "HLD-111-2", "HLD-80", "HLD-85", "HLD-28", "HLD-47", "HLD-72-2", "HLD-112", "HLD-23")
+metagenomicHealthy <- c("HLD-100", "HLD-102", "HLD-111-2", "HLD-80", "HLD-85", "HLD-28", "HLD-112", "HLD-23")
 metagenomicGroups[which(metadata$X%in%metagenomicHealthy)] <- 0
 
 data <- read.table("data/summed_data_gg.txt",header=TRUE,sep="\t",quote="",row.names=1)
