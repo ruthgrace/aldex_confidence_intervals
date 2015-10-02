@@ -133,10 +133,46 @@ text(x =x_axis[c(TRUE,FALSE)], y = par("usr")[3] - 1.25, labels = taxa_labels,sr
 legend(x=1, y=14, legend=c("Healthy vs. NASH", "Metagenomic study samples only"),col=c(1,2),pch=19)
 dev.off()
 
+#plot effect sizes for top OTUs in metagenomic
+x_axis <- c(1:20)
+
+effect <- c(1:20)
+effect <- metagenomic.nash.healthy.20$effect
+
+effect.975 <- c(1:20)
+effect.975 <- metagenomic.nash.healthy.20$effect.975
+
+effect.025 <- c(1:20)
+effect.025 <- metagenomic.nash.healthy.20$effect.025
+
+taxa_labels <- as.character(taxa_table$taxonomy[which(rownames(taxa_table)%in%rownames(metagenomic.nash.healthy.20))])
+taxa_labels <- gsub("^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;","",taxa_labels)
+
+pdf("metagenomic_samples_top_20_otu_effect_size_with_confidence_intervals.pdf")
+plot(NA, xlim=c(0,21),ylim=c(-20,20),main="Confidence Intervals for OTUs with High Effect Size",xlab="OTU",ylab="Effect size",xaxt='n')
+points(x_axis, effect,ann=FALSE,pch=19)
+arrows(x_axis, effect.025, x_axis, effect.975, length=0.05, angle=90, code=3)
+text(x =x_axis, y = par("usr")[3] - 2.25, labels = taxa_labels,srt = 45, pos = 1, xpd = TRUE, cex=0.5)
+dev.off()
+
+
+write.table(metagenomic.nash.healthy,file="metagenomic_samples_aldex_results.txt",sep="\t",quote=FALSE)
+
 pdf("metagenomic_and_healthy_vs_nash_effect_size_correlation.pdf")
 metagenomic.effect <- metagenomic.nash.healthy$effect[order(rownames(metagenomic.nash.healthy))]
 nash.effect <- healthy.nash$effect[order(rownames(healthy.nash))]
 plot(metagenomic.effect, nash.effect, pch=19, col=rgb(1,0,1,0.3), main="Metagenomic samples' effect size against all healthy vs. nash effect size", xlab="metagenomic samples effect size", ylab="all samples effect size")
+aldex.plot(metagenomic.nash.healthy, type="MA", test="welch")
+aldex.plot(metagenomic.nash.healthy, type="MW", test="welch")
+
+dev.off()
+
+pdf("Healthy_vs_NASH_metagenomic_samples.pdf")
+aldex.plot(metagenomic.nash.healthy, type="MW", test="welch")
+dev.off()
+
+pdf("Healthy_vs_NASH_all_samples.pdf")
+aldex.plot(healthy.nash, type="MW", test="welch")
 dev.off()
 
 #
