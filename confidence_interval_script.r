@@ -25,19 +25,51 @@ metagenomicGroups[which(metadata$X%in%metagenomicNASH)] <- 1
 metagenomicHealthy <- c("HLD-100", "HLD-102", "HLD-111-2", "HLD-80", "HLD-85", "HLD-28", "HLD-112", "HLD-23")
 metagenomicGroups[which(metadata$X%in%metagenomicHealthy)] <- 0
 
-data <- read.table("data/summed_data_gg.txt",header=TRUE,sep="\t",quote="",row.names=1)
+data <- read.table("data/td_OTU_tag_mapped_lineage.txt", header=TRUE,sep="\t",quote="",row.names=1)
 
-healthy.ssnash <- aldex(data, binaryGroups, mc.samples=128, test="t", effect=TRUE,
+taxonomy <- data.taxonomy[,ncol(data)]
+taxonomy <- as.character(taxonomy)
+
+data <- data[,c(1:(ncol(data)-1))]
+
+taxonomy <- strsplit(taxonomy,";")
+
+genus <- lapply(taxonomy,function(x) { return(x[6]) })
+
+genus <- unlist(genus)
+
+grouplist <- list()
+grouplist[[1]] <- genus
+
+data.genus <- aggregate(data, by=grouplist, sum,simplify=TRUE)
+
+rownames(data.genus) <- data.genus$Group.1
+
+data.genus <- data.genus[,c(2:ncol(data.genus))]
+
+healthy.ssnash <- aldex(data.genus, binaryGroups, mc.samples=128, test="t", effect=TRUE,
     include.sample.summary=FALSE, verbose=FALSE)
 
-healthy.nash <- aldex(data, nashHealthyGroups, mc.samples=128, test="t", effect=TRUE,
+healthy.nash <- aldex(data.genus, nashHealthyGroups, mc.samples=128, test="t", effect=TRUE,
     include.sample.summary=FALSE, verbose=FALSE)
 
-healthy.ss <- aldex(data, ssHealthyGroups, mc.samples=128, test="t", effect=TRUE,
+healthy.ss <- aldex(data.genus, ssHealthyGroups, mc.samples=128, test="t", effect=TRUE,
     include.sample.summary=FALSE, verbose=FALSE)
 
-metagenomic.nash.healthy <- aldex(data, metagenomicGroups, mc.samples=128, test="t", effect=TRUE,
+metagenomic.nash.data.genus <- aldex(data, metagenomicGroups, mc.samples=128, test="t", effect=TRUE,
     include.sample.summary=FALSE, verbose=FALSE)
+
+# healthy.ssnash <- aldex(data, binaryGroups, mc.samples=128, test="t", effect=TRUE,
+#     include.sample.summary=FALSE, verbose=FALSE)
+# 
+# healthy.nash <- aldex(data, nashHealthyGroups, mc.samples=128, test="t", effect=TRUE,
+#     include.sample.summary=FALSE, verbose=FALSE)
+# 
+# healthy.ss <- aldex(data, ssHealthyGroups, mc.samples=128, test="t", effect=TRUE,
+#     include.sample.summary=FALSE, verbose=FALSE)
+# 
+# metagenomic.nash.healthy <- aldex(data, metagenomicGroups, mc.samples=128, test="t", effect=TRUE,
+#     include.sample.summary=FALSE, verbose=FALSE)
 
 #sort
 healthy.ssnash <- healthy.ssnash[order(-abs(healthy.ssnash$effect)),]
